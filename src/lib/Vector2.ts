@@ -21,6 +21,10 @@ export default class Vector2 {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  static subtract(vectorA: Vector2, vectorB: Vector2) {
+    return new Vector2(vectorA.x - vectorB.x, vectorA.y - vectorB.y);
+  }
+
   static dotProduct(vectorA: Vector2, vectorB: Vector2) {
     return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
   }

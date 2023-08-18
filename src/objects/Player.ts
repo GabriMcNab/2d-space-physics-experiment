@@ -5,7 +5,7 @@ import Entity from "@/entity/Entity";
 import CircleCollider2D from "@/components/CircleCollider2D";
 
 export default class Player extends Entity {
-  isAiming = true;
+  state: "AIMING" | "SHOT" | "FLYING" = "AIMING";
 
   constructor(initialPosition: Vector2) {
     super();

@@ -10,9 +10,13 @@ import renderSystem from "./systems/renderSystem";
 import BoxCollider2D from "./components/BoxCollider2D";
 import collisionSystem from "./systems/collisionSystem";
 import CircleCollider2D from "./components/CircleCollider2D";
+import AimIndicator from "./objects/AimIndicator";
+import shootingSystem from "./systems/shootingSystem";
 // import { isCorrectInput } from "./utils/typeGuards";
 
 // Global variables
+
+const PLAYER_STARTING_POS = new Vector2(495, 700);
 
 const app = new PIXI.Application<HTMLCanvasElement>({
   width: 1000,
@@ -40,7 +44,8 @@ function main() {
 
   const planet1 = new Planet(new Vector2(400, 300), 40, "orangered");
   const planet2 = new Planet(new Vector2(300, 100), 20, "lightblue");
-  const player = new Player(new Vector2(495, 700));
+  const player = new Player(PLAYER_STARTING_POS);
+  const aimIndicator = new AimIndicator(PLAYER_STARTING_POS);
 
   // Add temporary walls
   const wallsDimensions = [
@@ -72,16 +77,16 @@ function main() {
   entities[planet1.id] = planet1;
   entities[planet2.id] = planet2;
   entities[player.id] = player;
-
-  // Set initial velocity to player
-  // const playerBodyComponent = player.getComponent<Body2D>("Body2D");
-  // if (playerBodyComponent) {
-  //   playerBodyComponent.velocity = new Vector2(0.5, -4);
-  // }
+  entities[aimIndicator.id] = aimIndicator;
 
   // Scene event handlers
   app.stage.on("pointermove", (e) => {
     mousePosition = new Vector2(e.global.x, e.global.y);
+  });
+  app.stage.on("click", () => {
+    if (player.state === "AIMING") {
+      player.state = "SHOT";
+    }
   });
 
   // Setup scene
@@ -110,9 +115,10 @@ function main() {
   // Render loop
   app.ticker.add((dt) => {
     const e = Object.values(entities);
+    shootingSystem(player, aimIndicator, mousePosition);
     movementSystem(e, dt);
-    collisionSystem(e, dt);
-    renderSystem(e, app.stage, mousePosition);
+    collisionSystem(e);
+    renderSystem(e);
   });
 }
 

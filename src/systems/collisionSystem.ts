@@ -3,7 +3,7 @@ import CircleCollider2D from "@/components/CircleCollider2D";
 import Entity from "@/entity/Entity";
 import Vector2 from "@/lib/Vector2";
 
-export default function collisionSystem(entities: Entity[], deltaTime: number) {
+export default function collisionSystem(entities: Entity[]) {
   for (const entity of entities) {
     const circleColliderComponent = entity.getComponent<CircleCollider2D>("CircleCollider2D");
     const boxColliderComponent = entity.getComponent<BoxCollider2D>("BoxCollider2D");
