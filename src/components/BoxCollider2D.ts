@@ -1,5 +1,6 @@
 import { BaseCollider, BaseComponent, Collider2D } from "@/types/components";
 import Body2D from "./Body2D";
+import Graphics from "./Graphics";
 
 export default class BoxCollider2D implements BaseComponent, BaseCollider {
   name = "BoxCollider2D";
@@ -8,9 +9,10 @@ export default class BoxCollider2D implements BaseComponent, BaseCollider {
   readonly width: number;
   readonly height: number;
   readonly debug: boolean = false;
+  readonly debugGraphics: Graphics | undefined;
 
   onCollisionEnter = (collider: Collider2D) => {
-    console.log("collision!", collider);
+    console.log("collision box!", collider);
   };
 
   constructor(attachedBody: Body2D, width: number, height: number, opt?: { debug?: boolean }) {
@@ -20,6 +22,8 @@ export default class BoxCollider2D implements BaseComponent, BaseCollider {
 
     if (opt?.debug) {
       this.debug = true;
+      this.debugGraphics = new Graphics(this.attachedBody.position);
+      this.debugGraphics.drawBox(this.width, this.height, "yellow", true);
     }
   }
 }

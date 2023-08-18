@@ -8,6 +8,8 @@ import Body2D, { BodyType } from "./components/Body2D";
 import movementSystem from "./systems/movementSystem";
 import renderSystem from "./systems/renderSystem";
 import BoxCollider2D from "./components/BoxCollider2D";
+import collisionSystem from "./systems/collisionSystem";
+import CircleCollider2D from "./components/CircleCollider2D";
 // import { isCorrectInput } from "./utils/typeGuards";
 
 // Global variables
@@ -20,6 +22,7 @@ const app = new PIXI.Application<HTMLCanvasElement>({
 
 // State
 
+let mousePosition = new Vector2(0, 0);
 const entities: Record<Entity["id"], Entity> = {};
 // const CURRENT_INPUT: Record<UserInputKey, boolean> = {
 //   w: false,
@@ -32,10 +35,12 @@ const entities: Record<Entity["id"], Entity> = {};
 
 function main() {
   document.body.appendChild(app.view);
+  app.stage.eventMode = "static";
+  app.stage.hitArea = app.screen;
 
   const planet1 = new Planet(new Vector2(400, 300), 40, "orangered");
   const planet2 = new Planet(new Vector2(300, 100), 20, "lightblue");
-  const player = new Player(new Vector2(495, 840));
+  const player = new Player(new Vector2(495, 700));
 
   // Add temporary walls
   const wallsDimensions = [
@@ -47,12 +52,9 @@ function main() {
   for (let i = 0; i < 4; i++) {
     const wall = new Entity();
     const dim = wallsDimensions[i];
-    const graphics = new PIXI.Graphics();
-    graphics.beginFill(0xde3249);
-    graphics.drawRect(dim[0], dim[1], dim[2], dim[3]);
-    graphics.endFill();
 
-    const graphicsComponent = new Graphics(graphics);
+    const graphicsComponent = new Graphics(new Vector2(dim[0], dim[1]));
+    graphicsComponent.drawBox(dim[2], dim[3], "0xde3249");
 
     const body2DComponent = new Body2D({
       type: BodyType.KINETIC,
@@ -72,15 +74,45 @@ function main() {
   entities[player.id] = player;
 
   // Set initial velocity to player
-  const playerBodyComponent = player.getComponent<Body2D>("Body2D");
-  if (playerBodyComponent) {
-    playerBodyComponent.velocity = new Vector2(0.1, -1);
+  // const playerBodyComponent = player.getComponent<Body2D>("Body2D");
+  // if (playerBodyComponent) {
+  //   playerBodyComponent.velocity = new Vector2(0.5, -4);
+  // }
+
+  // Scene event handlers
+  app.stage.on("pointermove", (e) => {
+    mousePosition = new Vector2(e.global.x, e.global.y);
+  });
+
+  // Setup scene
+  for (const entity of Object.values(entities)) {
+    const bodyComponent = entity.getComponent<Body2D>("Body2D");
+    const graphicsComponent = entity.getComponent<Graphics>("Graphics");
+    const boxColliderComponent = entity.getComponent<BoxCollider2D>("BoxCollider2D");
+    const circleColliderComponent = entity.getComponent<CircleCollider2D>("CircleCollider2D");
+
+    if (graphicsComponent) {
+      app.stage.addChild(graphicsComponent.graphics);
+    }
+    if (
+      bodyComponent &&
+      circleColliderComponent &&
+      circleColliderComponent.debug &&
+      circleColliderComponent.debugGraphics
+    ) {
+      app.stage.addChild(circleColliderComponent.debugGraphics.graphics);
+    }
+    if (bodyComponent && boxColliderComponent && boxColliderComponent.debug && boxColliderComponent.debugGraphics) {
+      app.stage.addChild(boxColliderComponent.debugGraphics.graphics);
+    }
   }
 
+  // Render loop
   app.ticker.add((dt) => {
     const e = Object.values(entities);
     movementSystem(e, dt);
-    renderSystem(e, app.stage);
+    collisionSystem(e, dt);
+    renderSystem(e, app.stage, mousePosition);
   });
 }
 

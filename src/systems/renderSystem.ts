@@ -4,14 +4,23 @@ import CircleCollider2D from "@/components/CircleCollider2D";
 import Graphics from "@/components/Graphics";
 import Entity from "@/entity/Entity";
 import BoxCollider2D from "@/components/BoxCollider2D";
+import Player from "@/objects/Player";
+import Planet from "@/objects/Planet";
+import Vector2 from "@/lib/Vector2";
 
-const colliderDebugGraphics = new PIXI.Graphics();
+const aimIndicator = new Graphics();
 
-export default function renderSystem(entities: Entity[], stage: PIXI.Container) {
-  colliderDebugGraphics.clear();
-
+/**
+ * This system is used to update the graphics on every frame
+ * @param entities
+ * @param mousePosition
+ */
+export default function renderSystem(
+  entities: Entity[] | Player[] | Planet[],
+  stage: PIXI.Container,
+  mousePosition: Vector2
+) {
   for (const entity of entities) {
-    const graphics = new PIXI.Graphics();
     const bodyComponent = entity.getComponent<Body2D>("Body2D");
     const graphicsComponent = entity.getComponent<Graphics>("Graphics");
     const boxColliderComponent = entity.getComponent<BoxCollider2D>("BoxCollider2D");
@@ -22,35 +31,33 @@ export default function renderSystem(entities: Entity[], stage: PIXI.Container) 
         // Set the graphics positions to the updated body position
         graphicsComponent.graphics.position.set(bodyComponent.position.x, bodyComponent.position.y);
       }
-      graphics.addChild(graphicsComponent.graphics);
     }
 
     // Collider debug
-    if (bodyComponent && circleColliderComponent && circleColliderComponent.debug) {
-      colliderDebugGraphics.lineStyle({ width: 1, color: "yellow" });
-      colliderDebugGraphics.drawCircle(
-        bodyComponent.position.x,
-        bodyComponent.position.y,
-        circleColliderComponent.radius
-      );
-      colliderDebugGraphics.endFill();
-
-      graphics.addChild(colliderDebugGraphics);
+    if (
+      bodyComponent &&
+      circleColliderComponent &&
+      circleColliderComponent.debug &&
+      circleColliderComponent.debugGraphics
+    ) {
+      circleColliderComponent.debugGraphics.position = new Vector2(bodyComponent.position.x, bodyComponent.position.y);
     }
-    if (bodyComponent && boxColliderComponent && boxColliderComponent.debug) {
-      colliderDebugGraphics.lineStyle({ width: 1, color: "yellow" });
-      colliderDebugGraphics.drawRect(
-        bodyComponent.position.x,
-        bodyComponent.position.y,
-        boxColliderComponent.width,
-        boxColliderComponent.height
-      );
-      colliderDebugGraphics.endFill();
-
-      graphics.addChild(colliderDebugGraphics);
+    if (bodyComponent && boxColliderComponent && boxColliderComponent.debug && boxColliderComponent.debugGraphics) {
+      boxColliderComponent.debugGraphics.position = new Vector2(bodyComponent.position.x, bodyComponent.position.y);
     }
 
-    // Render the stage
-    stage.addChild(graphics);
+    // Aiming system
+    if (bodyComponent && entity instanceof Player && entity.isAiming) {
+      const mousePositionRelativeToPlayer = new Vector2(
+        mousePosition.x - bodyComponent.position.x,
+        mousePosition.y - bodyComponent.position.y
+      ).normalized;
+      mousePositionRelativeToPlayer.scale(100);
+
+      aimIndicator.graphics.clear();
+      aimIndicator.position = bodyComponent.position;
+      aimIndicator.drawLineTo(mousePositionRelativeToPlayer, "yellow");
+      stage.addChild(aimIndicator.graphics);
+    }
   }
 }
