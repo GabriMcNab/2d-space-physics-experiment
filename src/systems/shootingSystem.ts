@@ -1,4 +1,5 @@
 import Body2D from "@/components/Body2D";
+import { EventBus } from "@/lib/EventBus";
 import Vector2 from "@/lib/Vector2";
 import AimIndicator from "@/objects/AimIndicator";
 import Player from "@/objects/Player";
@@ -16,6 +17,9 @@ export default function shootingSystem(player: Player, aimIndicator: AimIndicato
       targetVelocity.scale(5);
       playerBodyComponent.velocity = targetVelocity;
       player.state = "FLYING";
+
+      // Remove aim indicator
+      EventBus.getInstance().emit("destroy", aimIndicator.id);
     }
   }
 }

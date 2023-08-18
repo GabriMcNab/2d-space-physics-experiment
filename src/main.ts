@@ -12,6 +12,7 @@ import collisionSystem from "./systems/collisionSystem";
 import CircleCollider2D from "./components/CircleCollider2D";
 import AimIndicator from "./objects/AimIndicator";
 import shootingSystem from "./systems/shootingSystem";
+import { EventBus } from "./lib/EventBus";
 // import { isCorrectInput } from "./utils/typeGuards";
 
 // Global variables
@@ -87,6 +88,14 @@ function main() {
     if (player.state === "AIMING") {
       player.state = "SHOT";
     }
+  });
+  EventBus.getInstance().on("destroy", (objId) => {
+    const graphicsComponent = entities[objId as unknown as number].getComponent<Graphics>("Graphics");
+    if (graphicsComponent) {
+      graphicsComponent.graphics.destroy();
+      entities[objId as unknown as number].removeComponent("Graphics");
+    }
+    delete entities[objId as unknown as number];
   });
 
   // Setup scene
