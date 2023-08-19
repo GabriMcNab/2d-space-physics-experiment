@@ -1,4 +1,4 @@
-import { BaseCollider, BaseComponent, Collider2D } from "@/types/components";
+import { BaseCollider, BaseComponent, Collision2D } from "@/types/components";
 import Body2D from "./Body2D";
 import Graphics from "./Graphics";
 
@@ -11,9 +11,9 @@ export default class BoxCollider2D implements BaseComponent, BaseCollider {
   readonly debug: boolean = false;
   readonly debugGraphics: Graphics | undefined;
 
-  onCollisionEnter = (collider: Collider2D) => {
-    console.log("collision box!", collider);
-  };
+  onCollisionEnter(collision: Collision2D) {
+    return;
+  }
 
   constructor(attachedBody: Body2D, width: number, height: number, opt?: { debug?: boolean }) {
     this.attachedBody = attachedBody;

@@ -28,34 +28,49 @@ export default function collisionSystem(entities: Entity[]) {
         continue;
       }
 
-      if (circleColliderComponent && otherBoxColliderComponent) {
-        const hit = detectCircleAndBoxCollision(circleColliderComponent, otherBoxColliderComponent);
-        if (hit) circleColliderComponent.onCollisionEnter(circleColliderComponent);
+      // if (circleColliderComponent && otherBoxColliderComponent) {
+      //   const hit = detectCircleAndBoxCollision(circleColliderComponent, otherBoxColliderComponent);
+      //   if (hit) circleColliderComponent.onCollisionEnter(circleColliderComponent);
+      // }
+
+      if (circleColliderComponent && otherCircleColliderComponent) {
+        const hit = detectCircleAndCircleCollision(circleColliderComponent, otherCircleColliderComponent);
+        if (hit)
+          circleColliderComponent.onCollisionEnter({
+            collider: circleColliderComponent,
+            otherCollider: otherCircleColliderComponent,
+          });
       }
     }
-    // If there is a collision, call the "onCollisionEnter" callback on the collider
   }
 }
 
-function detectCircleAndBoxCollision(circle: CircleCollider2D, box: BoxCollider2D) {
-  const { x: circleX, y: circleY } = circle.attachedBody.position;
-  const { x: boxX, y: boxY } = box.attachedBody.position;
-
-  let closestX = circleX;
-  let closestY = circleY;
-
-  // Check which edge is closest
-  if (circleX < boxX) closestX = boxX; // left edge
-  else if (circleX > boxX + box.width) closestX = boxX + box.width; // right edge
-  if (circleY < boxY) closestY = boxY; // top edge
-  else if (circleY > boxY + box.height) closestY = boxY + box.height; // bottom edge
-
-  // get distance from closest edges
-  const distance = Vector2.getDistance(circle.attachedBody.position, new Vector2(closestX, closestY));
-
-  // if the distance is less than the radius, collision!
-  if (distance <= circle.radius) {
-    return true;
-  }
-  return false;
+function detectCircleAndCircleCollision(circleA: CircleCollider2D, circleB: CircleCollider2D) {
+  // If the square of the distance of the two centers is less or equal than the square of the sum of the radii, then there is a collision
+  const distance = Vector2.getDistance(circleA.attachedBody.position, circleB.attachedBody.position);
+  if (Math.pow(distance, 2) <= Math.pow(circleA.radius + circleB.radius, 2)) return true;
+  else return false;
 }
+
+// function detectCircleAndBoxCollision(circle: CircleCollider2D, box: BoxCollider2D) {
+//   const { x: circleX, y: circleY } = circle.attachedBody.position;
+//   const { x: boxX, y: boxY } = box.attachedBody.position;
+
+//   let closestX = circleX;
+//   let closestY = circleY;
+
+//   // Check which edge is closest
+//   if (circleX < boxX) closestX = boxX; // left edge
+//   else if (circleX > boxX + box.width) closestX = boxX + box.width; // right edge
+//   if (circleY < boxY) closestY = boxY; // top edge
+//   else if (circleY > boxY + box.height) closestY = boxY + box.height; // bottom edge
+
+//   // get distance from closest edges
+//   const distance = Vector2.getDistance(circle.attachedBody.position, new Vector2(closestX, closestY));
+
+//   // if the distance is less than the radius, collision!
+//   if (distance <= circle.radius) {
+//     return true;
+//   }
+//   return false;
+// }

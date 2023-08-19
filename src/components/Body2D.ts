@@ -11,11 +11,13 @@ export default class Body2D implements BaseComponent {
 
   readonly type: BodyType;
 
+  mass = 1;
   position: Vector2;
   velocity: Vector2;
 
-  constructor(opt?: { type?: BodyType; initialPosition?: Vector2; initialVelocity?: Vector2 }) {
+  constructor(opt?: { type?: BodyType; initialPosition?: Vector2; initialVelocity?: Vector2; mass?: number }) {
     this.type = opt?.type ?? BodyType.KINETIC;
+    this.mass = opt?.mass ?? 1;
     this.position = opt?.initialPosition ?? new Vector2(0, 0);
     this.velocity = opt?.initialVelocity ?? new Vector2(0, 0);
   }
